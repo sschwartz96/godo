@@ -51,7 +51,7 @@ func parseFlags(args []string) *cmdFlags {
 // 7. -p=tws	{flag: "p", value: "tws"}
 func getFlag(flagLoc int, args []string) (string, string, error) {
 	if !strings.HasPrefix(args[flagLoc], "-") {
-		return "", "", fmt.Errorf("No '-' prefix, not flag")
+		return "", "", fmt.Errorf("no '-' prefix, not flag")
 	}
 
 	// satifies case 6, 7
@@ -81,7 +81,7 @@ type cmdFlags struct {
 func (f *cmdFlags) getValue(flag string) (string, error) {
 	value, ok := f.flags[flag]
 	if !ok {
-		return "", fmt.Errorf("Flag does not exist")
+		return "", fmt.Errorf("flag does not exist")
 	}
 	return value, nil
 }

@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 type status string
@@ -36,11 +38,21 @@ type godo struct {
 }
 
 func (g *godo) String() string {
+	width, _, err := terminal.GetSize(0)
+	if err != nil {
+		return fmt.Sprintf("Error encounter while trying to get terminal size: %v", err)
+	}
+	oneThirdWidth := width / 3
+	// leftOverSpace := width - (width / 3 * 2) + 4 + 5
 	sb := strings.Builder{}
-	sb.WriteString(createDividerLine(32 * 3))
+	sb.WriteString(createDividerLine(width))
 	sb.WriteString("\n\n")
-	sb.WriteString(fmt.Sprintf("%-32s%-32s%-32s\n", "Todo", "Doing", "Done"))
-	sb.WriteString(createDividerLine(32 * 3))
+	sb.WriteString("Todo")
+	addSpace(&sb, oneThirdWidth-4)
+	sb.WriteString("Doing")
+	addSpace(&sb, oneThirdWidth-5)
+	sb.WriteString("Done\n")
+	sb.WriteString(createDividerLine(width))
 	sb.WriteString("\n\n")
 
 	var iTodo, iDoing, iDone int
@@ -55,14 +67,20 @@ func (g *godo) String() string {
 			iTodo++
 			printedTodoID = false
 		}
+		prefixLength := 0
 		if !printedTodoID && bufTodo.hasNext() {
-			sb.WriteString(fmt.Sprintf("%d. ", curTodo.Id))
+			idStr := fmt.Sprintf("%d. ", curTodo.Id)
+			prefixLength = len(idStr)
+			sb.WriteString(idStr)
 			printedTodoID = true
 		} else {
 			sb.WriteString("   ")
+			prefixLength = 3
 		}
 
-		sb.WriteString(fmt.Sprintf("%-29s", bufTodo.getNext(27)))
+		bufTodoNext := bufTodo.getNext(oneThirdWidth - prefixLength - 2)
+		sb.WriteString(bufTodoNext)
+		addSpace(&sb, oneThirdWidth-len(bufTodoNext)-prefixLength)
 
 		if len(g.Doing) > iDoing && !bufDoing.hasNext() {
 			curDoing = g.Doing[iDoing]
@@ -71,13 +89,18 @@ func (g *godo) String() string {
 			printedDoingID = false
 		}
 		if !printedDoingID && bufDoing.hasNext() {
-			sb.WriteString(fmt.Sprintf("%d. ", curDoing.Id))
+			idStr := fmt.Sprintf("%d. ", curDoing.Id)
+			prefixLength = len(idStr)
+			sb.WriteString(idStr)
 			printedDoingID = true
 		} else {
 			sb.WriteString("   ")
+			prefixLength = 3
 		}
 
-		sb.WriteString(fmt.Sprintf("%-29s", bufDoing.getNext(27)))
+		bufDoingNext := bufDoing.getNext(oneThirdWidth - prefixLength - 2)
+		sb.WriteString(bufDoingNext)
+		addSpace(&sb, oneThirdWidth-len(bufDoingNext)-prefixLength)
 
 		if len(g.Done) > iDone && !bufDone.hasNext() {
 			curDone = g.Done[iDone]
@@ -86,16 +109,28 @@ func (g *godo) String() string {
 			printedDoneID = false
 		}
 		if !printedDoneID && bufDone.hasNext() {
-			sb.WriteString(fmt.Sprintf("%d. ", curDone.Id))
+			idStr := fmt.Sprintf("%d. ", curDone.Id)
+			prefixLength = len(idStr)
+			sb.WriteString(idStr)
 			printedDoneID = true
 		} else {
 			sb.WriteString("   ")
+			prefixLength = 3
 		}
-		sb.WriteString(fmt.Sprintf("%-29s", bufDone.getNext(27)))
+
+		sb.WriteString(bufDone.getNext(oneThirdWidth - 2))
 
 		sb.WriteString("\n")
 	}
 	return sb.String()
+}
+
+// addSpace adds space to s strings.Builder for n length
+func addSpace(builder *strings.Builder, n int) {
+	for i := 0; i < n; i++ {
+		builder.WriteString(" ")
+	}
+	return
 }
 
 type bufferedString struct {

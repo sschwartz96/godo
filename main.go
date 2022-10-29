@@ -31,6 +31,7 @@ func main() {
 			fmt.Println("Error opening godo.json file:", err)
 		}
 	}
+
 	defer func() {
 		// encode to file
 		err := f.Truncate(0)
@@ -112,7 +113,7 @@ func main() {
 			if err != nil {
 				g.Doing, item, err = removeTodoFromSlice(id, g.Doing)
 				if err != nil {
-					g.Done, item, err = removeTodoFromSlice(id, g.Done)
+					g.Done, item, _ = removeTodoFromSlice(id, g.Done)
 				}
 			}
 		} else {
