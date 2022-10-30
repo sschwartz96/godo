@@ -26,7 +26,7 @@ func parseFlags(args []string) *cmdFlags {
 				wasLastFlag = false
 				continue
 			}
-			// append too the extra if last argument was not flag or is the last argument
+			// append to the extra if last argument was not flag or is the last argument
 			if !wasLastFlag || len(args)-1 == i {
 				extraSlice = append(extraSlice, args[i])
 			}

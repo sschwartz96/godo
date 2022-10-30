@@ -4,7 +4,7 @@ godo is a simple command line todo/kanban board
 
 ## Description
 
-godo started as a simple todo list for my personal projects, that I work on alone. 
+godo started as a simple todo list. 
 
 godo starts by reading a godo.json file in the currect directory, if not exists it creates one.
 

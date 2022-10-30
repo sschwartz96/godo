@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math/rand"
@@ -230,4 +231,25 @@ func createDividerLine(length int) string {
 		sb.WriteString("_")
 	}
 	return sb.String()
+}
+
+func (g *godo) matchPrefixTodo(prefix string) (int, error) {
+	return matchPrefix(prefix, g.Todo)
+}
+
+func (g *godo) matchPrefixDoing(prefix string) (int, error) {
+	return matchPrefix(prefix, g.Doing)
+}
+
+func (g *godo) matchPrefixDone(prefix string) (int, error) {
+	return matchPrefix(prefix, g.Done)
+}
+
+func matchPrefix(prefix string, list []todoItem) (int, error) {
+	for _, item := range list {
+		if strings.HasPrefix(item.Text, prefix) {
+			return item.Id, nil
+		}
+	}
+	return 0, errors.New("no prefix match")
 }

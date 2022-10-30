@@ -88,6 +88,14 @@ func main() {
 		}
 
 		if prog.hasFlag("d") {
+			// append value of flag d to prefix of text
+			val, err := prog.getValue("d")
+			// this should never happen
+			if err != nil {
+				fmt.Println("d flag has no value")
+				return
+			}
+			item.Text = val + " " + item.Text
 			g.Doing = append(g.Doing, item)
 		} else {
 			g.Todo = append(g.Todo, item)
@@ -95,17 +103,32 @@ func main() {
 
 	case "mv":
 		split := strings.Split(prog.extra, " ")
-		if len(split) != 2 {
+		if len(split) < 2 {
 			fmt.Println("Invalid arguments of mv:")
 			fmt.Println("\tmv [ID] [LIST_NAME]")
 			return
 		}
 		id, err := strconv.Atoi(split[0])
-		if err != nil {
-			fmt.Println("Error parsing id:", err)
+		for err != nil {
+			prefixText := strings.Join(split[0:len(split)-2], " ")
+			// attempt to parse by match text
+			id, err = g.matchPrefixTodo(prefixText)
+			if err == nil {
+				break
+			}
+			id, err = g.matchPrefixDoing(prefixText)
+			if err == nil {
+				break
+			}
+			id, err = g.matchPrefixDone(prefixText)
+			if err == nil {
+				break
+			}
+
+			fmt.Println("Error parsing id or matching prefix text:", err)
 			return
 		}
-		toListName := strings.ToLower(split[1])
+		toListName := strings.ToLower(split[len(split)-1])
 
 		var item *todoItem
 		if toListName == "todo" || toListName == "doing" || toListName == "done" {
@@ -117,10 +140,10 @@ func main() {
 				}
 			}
 		} else {
-			fmt.Printf("%s not a list\n", split[1])
+			fmt.Printf("%s not a list\n", toListName)
 			return
 		}
-		switch strings.ToLower(split[1]) {
+		switch strings.ToLower(toListName) {
 		case "todo":
 			g.Todo = append(g.Todo, *item)
 
