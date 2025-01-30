@@ -150,7 +150,7 @@ func (b *bufferedString) getNext(size int) string {
 	}
 
 	spaceIndex := strings.LastIndex(b.s[:size], " ")
-	if spaceIndex == -1 {
+	if spaceIndex == -1 || spaceIndex == 0 {
 		s = b.s[:size]
 		b.s = b.s[size:]
 	} else {
